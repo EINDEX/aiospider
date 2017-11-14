@@ -36,6 +36,10 @@ class Client:
         if self.session:
             self.__init()
 
+    def open(self):
+        self.session = aiohttp.ClientSession(headers=self._headers, cookies=self._cookies, loop=self.loop)
+        self.__init()
+
     def __init(self):
         if not self.session:
             raise ClientNoSessionException()
