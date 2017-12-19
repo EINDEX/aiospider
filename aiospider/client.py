@@ -43,13 +43,22 @@ class Client:
     def __init(self):
         if not self.session:
             raise ClientNoSessionException()
-        self.head = partial(self.session.head, proxy=self._proxy)
-        self.get = partial(self.session.get, proxy=self._proxy)
-        self.post = partial(self.session.post, proxy=self._proxy)
-        self.put = partial(self.session.put, proxy=self._proxy)
-        self.patch = partial(self.session.patch, proxy=self._proxy)
-        self.delete = partial(self.session.delete, proxy=self._proxy)
-        self.options = partial(self.session.options, proxy=self._proxy)
+        if self._proxy:
+            self.head = partial(self.session.head, proxy=self._proxy)
+            self.get = partial(self.session.get, proxy=self._proxy)
+            self.post = partial(self.session.post, proxy=self._proxy)
+            self.put = partial(self.session.put, proxy=self._proxy)
+            self.patch = partial(self.session.patch, proxy=self._proxy)
+            self.delete = partial(self.session.delete, proxy=self._proxy)
+            self.options = partial(self.session.options, proxy=self._proxy)
+        else:
+            self.head = self.session.head
+            self.get = self.session.get
+            self.post = self.session.post
+            self.put = self.session.put
+            self.patch = self.session.patch
+            self.delete = self.session.delete
+            self.options = self.session.options
 
     def __enter__(self):
         self.closed = False
