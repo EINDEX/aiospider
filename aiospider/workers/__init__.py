@@ -5,4 +5,4 @@
 @File          : __init__.py.py
 @Created       : 21/12/2017
 """
-from workers.base_worker import Worker
+from aiospider.workers.base_worker import Worker

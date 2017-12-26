@@ -11,8 +11,8 @@ import aiohttp
 import asyncio
 
 from job import ResponseJob, RequestJob
-from tools.job_queue import JobQueue
-from tools.redis_pool import RedisPool
+from aiospider.tools import JobQueue
+from aiospider.tools import RedisPool
 
 
 class Bot:

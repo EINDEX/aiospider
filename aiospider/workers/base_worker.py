@@ -5,17 +5,16 @@
 @File          : base_worker.py
 @Created       : 22/12/2017
 """
-import json
 import logging
 
 import asyncio
 
-from job import RequestJob, ResponseJob
-from tools.job_queue import JobQueue
-from tools.redis_pool import RedisPool
+from aiospider.models.job import RequestJob, ResponseJob
+from aiospider.tools import JobQueue
 
 
 class Worker:
+    keys = {}
     name = None
     worker = None
     url_regex = None
@@ -31,6 +30,17 @@ class Worker:
     @staticmethod
     def parser(data: dict):
         pass
+
+    @staticmethod
+    def pre_handle(resp_job: ResponseJob):
+        return True
+
+    @classmethod
+    async def _per_handle(cls, resp_job: ResponseJob):
+        if cls.pre_handle(resp_job):
+            return await cls.analyze(request_job=resp_job.request_job, content=resp_job.content)
+        else:
+            raise ValueError()
 
     @classmethod
     def request_builder(cls, keys: dict, params=None, headers=None, data=None, identity=None,
@@ -63,21 +73,7 @@ class Worker:
                 content = await queue.get()
                 if content:
                     resp_job = ResponseJob.from_json(content.decode())
-                    try:
-                        if resp_job.success:
-                            await cls.analyze(request_job=resp_job.request_job, content=resp_job.content)
-                            pool = await RedisPool.get_pool().pool
-                            if resp_job.request_job.params:
-                                key = f'{resp_job.request_job.url}{sorted(resp_job.request_job.params.items())}'
-                            else:
-                                key = f'{resp_job.request_job.url}'
-                            await pool.execute('sadd', f'{cls.name}:{cls.worker}:filter', key)
-                        else:
-                            await resp_job.request_job.send()
-                    except Exception as e:
-                        print(resp_job)
-                        logging.exception(e)
-                        await resp_job.request_job.send()
+                    await cls._per_handle(resp_job)
                 else:
                     await asyncio.sleep(1)
 

@@ -5,11 +5,10 @@
 @File          : clawer.py
 @Created       : 22/12/2017
 """
-import aioredis
 import asyncio
 
-from request.request import Bot
-from tools.redis_pool import RedisPool
+from aiospider.request import Bot
+from aiospider.tools import RedisPool
 
 
 async def start():

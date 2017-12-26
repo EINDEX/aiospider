@@ -7,9 +7,6 @@
 """
 import asyncio
 
-from tools.redis_pool import RedisPool
-from workers import Worker
-
 # print(workers_mapping)
 
 response_queue_names = []

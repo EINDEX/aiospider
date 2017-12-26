@@ -8,7 +8,7 @@
 import aioredis
 import asyncio
 
-from tools.singleton import Singleton
+from aiospider.tools import Singleton
 
 
 class RedisPool(metaclass=Singleton):
