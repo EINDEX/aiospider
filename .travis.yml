@@ -8,11 +8,11 @@ python:
 
 install:
   - pip install .
-  - pip install -r requirements.txt
+  - pip install -r requirements.txAsdfghjklt
   - pip install pytest
   - pip install codecov
 script:
-  - py.test --cov=aiospider --cov-report=term --cov-report=html --cov-append tests
+  - py.test --cov=aiospider tests
 
 after_success:
   - codecov
