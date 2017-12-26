@@ -12,7 +12,7 @@ install:
   - pip install pytest
   - pip install codecov
 script:
-  - pytest
+  - make cov-test
 
 after_success:
   - codecov
