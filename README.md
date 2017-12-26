@@ -1,5 +1,6 @@
 # AioSpider
-
+[![Build Status](https://travis-ci.org/EINDEX/aiospider.svg?branch=master)](https://travis-ci.org/EINDEX/aiospider) 
+[![PyPI](https://img.shields.io/pypi/v/aiospider.svg)]()
 ## 架构
 ### 执行单元
 - 执行请求
