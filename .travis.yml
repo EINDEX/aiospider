@@ -10,6 +10,8 @@ install:
   - pip install .
   - pip install -r requirements.txt
   - pip install codecov
+script:
+  - python3 tests/test.py
 
 after_success:
   - codecov
