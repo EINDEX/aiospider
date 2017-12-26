@@ -8,7 +8,7 @@ python:
 
 install:
   - pip install .
-  - pip install -r requirements.txAsdfghjklt
+  - pip install -r requirements.txt
   - pip install pytest
   - pip install codecov
 script:
