@@ -12,7 +12,7 @@ install:
   - pip install pytest
   - pip install codecov
 script:
-  - pytest tests
+  - pytest
 
 after_success:
   - codecov
