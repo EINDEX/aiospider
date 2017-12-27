@@ -7,8 +7,8 @@
 """
 import json
 
-from aiospider.tools import JobQueue
-from aiospider.tools import RedisPool
+from aiospider.tools.job_queue import JobQueue
+from aiospider.tools.redis_pool import RedisPool
 
 
 class RequestJob:
@@ -61,15 +61,12 @@ class RequestJob:
 
     async def send(self):
         content = {}
-        flag = False
         for k, v in self.__dict__.items():
             if v:
                 content[k] = v
-        if self.worker == 'person':
-            flag = True
         if not await self.bloom_filter(**content):
-            queue = await JobQueue.get_queue(f'{self.name}:request')
-            await queue.push(json.dumps(content), reverse=flag)
+            queue = await JobQueue.get_queue(f'{self.name}:{self.worker}:request')
+            await queue.push(json.dumps(content))
             return True
         else:
             return False
@@ -81,6 +78,7 @@ class RequestJob:
             'headers': self.headers,
             'method': self.method,
             'proxy': self.proxy,
+            'data': self.data,
             'allow_redirects': self.allow_redirect,
             'max_redirects': self.redirect_times,
         }

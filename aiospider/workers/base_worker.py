@@ -5,12 +5,11 @@
 @File          : base_worker.py
 @Created       : 22/12/2017
 """
+import asyncio
 import logging
 
-import asyncio
-
 from aiospider.models.job import RequestJob, ResponseJob
-from aiospider.tools import JobQueue
+from aiospider.tools.job_queue import JobQueue
 
 
 class Worker:
@@ -46,7 +45,7 @@ class Worker:
     def request_builder(cls, keys: dict, params=None, headers=None, data=None, identity=None,
                         redirect_times=None,
                         allow_redirect=None,
-                        proxy='http://lum-customer-hl_b9fea07e-zone-zone8:8lvtlx73qqnu@zproxy.luminati.io:22225',
+                        proxy=None,
                         cookies=None):
         url = cls.url_regex
         for key, value in keys.items():

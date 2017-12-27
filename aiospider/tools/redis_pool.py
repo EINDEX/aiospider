@@ -5,10 +5,11 @@
 @File          : redis_pool.py
 @Created       : 21/12/2017
 """
-import aioredis
 import asyncio
 
-from aiospider.tools import Singleton
+import aioredis
+
+from aiospider.tools.singleton import Singleton
 
 
 class RedisPool(metaclass=Singleton):

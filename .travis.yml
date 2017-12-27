@@ -10,9 +10,10 @@ install:
   - pip install .
   - pip install -r requirements.txt
   - pip install pytest
+  - pip install pytest-cov
   - pip install codecov
 script:
-  - py.test --cov=aiospider
+  - pytest --cov=aiospider
 
 after_success:
   - codecov

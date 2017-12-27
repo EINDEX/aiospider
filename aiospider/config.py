@@ -5,7 +5,7 @@
 @File          : config.py
 @Created       : 21/12/2017
 """
-from aiospider.tools import Singleton
+from aiospider.tools.singleton import Singleton
 
 
 class Config(metaclass=Singleton):

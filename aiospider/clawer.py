@@ -7,8 +7,8 @@
 """
 import asyncio
 
-from aiospider.request import Bot
-from aiospider.tools import RedisPool
+from aiospider.request.request import Bot
+from aiospider.tools.redis_pool import RedisPool
 
 
 async def start():

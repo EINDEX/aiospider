@@ -7,8 +7,8 @@
 """
 import asyncio
 
-from aiospider.tools import RedisPool
-from aiospider.tools import Singleton
+from aiospider.tools.redis_pool import RedisPool
+from aiospider.tools.singleton import Singleton
 
 
 class JobQueue(metaclass=Singleton):
