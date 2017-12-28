@@ -68,7 +68,7 @@ class Bot:
                             continue
                         try:
                             status, content = await self.request(session, **req_job.get_request_params())
-                            print(status, content)
+                            # print(status, content)
                             await ResponseJob(request_job=req_job, url=req_job.url, worker=req_job.worker,
                                               name=req_job.name,
                                               success=True,
