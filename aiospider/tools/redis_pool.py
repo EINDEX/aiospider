@@ -14,7 +14,6 @@ from aiospider.tools.singleton import OnlySingleton
 class RedisPool(metaclass=OnlySingleton):
     def __init__(self, app):
         self._app = app
-        self.redis_url = app.config['redis_conn']
         self._pool = None
 
     @property
@@ -28,3 +27,7 @@ class RedisPool(metaclass=OnlySingleton):
         if not self._app:
             self._app = AIOSpider(None)
         return self._app
+
+    @property
+    def redis_url(self):
+        return self.app.config['redis_conn']
