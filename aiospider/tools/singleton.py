@@ -7,6 +7,17 @@
 """
 
 
+class OnlySingleton(type):
+    def __init__(cls, name, bases, attrs):
+        super(OnlySingleton, cls).__init__(name, bases, attrs)
+        cls._instance = None
+
+    def __call__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(OnlySingleton, cls).__call__(*args, **kwargs)
+        return cls._instance
+
+
 class Singleton(type):
     def __init__(cls, name, bases, attrs):
         super(Singleton, cls).__init__(name, bases, attrs)
@@ -21,20 +32,4 @@ class Singleton(type):
 
     @staticmethod
     def key_gen(*args, **kwargs):
-        return f'{sorted(args)}:{sorted(kwargs.items())}'
-
-
-class Foo(metaclass=Singleton):
-    def __init__(self, x):
-        self.x = x
-
-
-if __name__ == '__main__':
-    a = Foo(1)
-    print(a.x)
-    b = Foo(2)
-    print(a.x)
-    c = Foo(1)
-    print(b.x)
-
-    print(a is c)
+        return f'{args}:{kwargs.items()}'

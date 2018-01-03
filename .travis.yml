@@ -1,10 +1,19 @@
 language: python
+
+sudo: required
+
+services:
+  - docker
+
 python:
   - 3.6
   - 3.6.1
   - 3.6.2
   - 3.6.3
   - 3.6.4
+
+before_install:
+  - docker run -d -p 6379:6379 --name redis-rebloom redislabs/rebloom:latest
 
 install:
   - pip install .

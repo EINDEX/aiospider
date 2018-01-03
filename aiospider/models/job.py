@@ -7,8 +7,9 @@
 """
 import json
 
+from aiospider import AIOSpider
+from aiospider.tools.bloom_tools import BloomFilter
 from aiospider.tools.job_queue import JobQueue
-from aiospider.tools.redis_pool import RedisPool
 
 
 class RequestJob:
@@ -39,6 +40,7 @@ class RequestJob:
         self.identity = identity
         self.worker = worker
         self.name = name
+        self._app = None
 
     def to_dict(self):
         content = {}
@@ -50,26 +52,27 @@ class RequestJob:
     def to_json(self):
         return json.dumps(self.to_dict())
 
-    @staticmethod
-    async def bloom_filter(name, worker, url, params=None, **kwargs):
-        pool = await RedisPool.get_pool().pool
+    async def bloom_filter(self, url, params=None):
+        bf = BloomFilter(app=self.app, name=f'{self.name}:{self.worker}:filter')
         if params:
             key = f'{url}{sorted(params.items())}'
         else:
             key = f'{url}'
-        return await pool.execute('sismember', f'{name}:{worker}:filter', key)
+        return await bf.exists(key)
 
     async def send(self):
         content = {}
         for k, v in self.__dict__.items():
             if v:
                 content[k] = v
-        if not await self.bloom_filter(**content):
-            queue = await JobQueue.get_queue(f'{self.name}:{self.worker}:request')
-            await queue.push(json.dumps(content))
-            return True
+        if self.method == 'GET' and not self.data:
+            if not await self.bloom_filter(url=self.url, params=self.params):
+                await self.queue.push(json.dumps(content))
+                return True
+            else:
+                return False
         else:
-            return False
+            return True
 
     def get_request_params(self):
         return {
@@ -82,6 +85,16 @@ class RequestJob:
             'allow_redirects': self.allow_redirect,
             'max_redirects': self.redirect_times,
         }
+
+    @property
+    def app(self):
+        if not self._app:
+            self._app = AIOSpider(None)
+        return self._app
+
+    @property
+    def queue(self):
+        return JobQueue(self.app, f'{self.name}:{self.worker}:response')
 
     @staticmethod
     def from_json(content):
@@ -103,7 +116,8 @@ class ResponseJob:
                  content_type=None,
                  status_code=None,
                  cookies=None,
-                 proxy=None):
+                 proxy=None,
+                 app=None):
         if isinstance(request_job, dict):
             self.request_job = RequestJob(**request_job)
         elif isinstance(request_job, RequestJob):
@@ -118,6 +132,7 @@ class ResponseJob:
         self.content_type = content_type
         self.success = success
         self.proxy = proxy
+        self._app = app
 
     def to_dict(self):
         content = {}
@@ -132,8 +147,17 @@ class ResponseJob:
         return json.dumps(self.to_dict())
 
     async def send(self):
-        queue = await JobQueue.get_queue(f'{self.name}:{self.worker}:response')
-        await queue.push(self.to_json())
+        await self.queue.push(self.to_json())
+
+    @property
+    def app(self):
+        if not self._app:
+            self._app = AIOSpider(None)
+        return self._app
+
+    @property
+    def queue(self):
+        return JobQueue(self.app, f'{self.name}:{self.worker}:response')
 
     @staticmethod
     def from_json(content):

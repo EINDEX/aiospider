@@ -54,7 +54,7 @@ class Bot:
     async def start(self, name):
         try:
             self.status = True
-            queue = await JobQueue.get_queue(name)
+            queue = JobQueue(None, name)
             async with self.session as session:
                 while True:
                     item = await queue.get()
@@ -62,13 +62,6 @@ class Bot:
                         item = item.decode()
                         try:
                             req_job = RequestJob.from_json(item)
-                            # pool = await RedisPool.get_pool().pool
-                            # if req_job.params:
-                            #     key = f'{req_job.url}{sorted(req_job.params.items())}'
-                            # else:
-                            #     key = f'{req_job.url}'
-                            # if await pool.execute('sismember', f'{req_job.name}:{req_job.worker}:filter', key):
-                            #     continue
                         except Exception as e:
                             logging.exception(e)
                             continue

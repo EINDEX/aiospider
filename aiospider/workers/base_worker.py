@@ -8,22 +8,33 @@
 import asyncio
 import logging
 
+from aiospider import AIOSpider
 from aiospider.models.job import RequestJob, ResponseJob
+from aiospider.tools.bloom_tools import BloomFilter
 from aiospider.tools.job_queue import JobQueue
 
 
 class Worker:
     keys = {}
-    name = None
-    worker = None
+    name = 'base'
+    worker = 'base'
     url_regex = None
     method = None
     params = {}
     require_params = []
     headers = {}
 
-    @classmethod
-    async def analyze(cls, request_job: RequestJob, content):
+    def __init__(self, app):
+        self._app = app
+
+    @property
+    def app(self):
+        if not self._app:
+            self._app = AIOSpider(None)
+        return self._app
+
+    async def analyze(self, req_job, content):
+        # do something with request success
         pass
 
     @staticmethod
@@ -32,14 +43,18 @@ class Worker:
 
     @staticmethod
     def pre_handle(resp_job: ResponseJob):
-        return True
+        return resp_job.success, resp_job.content
 
-    @classmethod
-    async def _per_handle(cls, resp_job: ResponseJob):
-        if cls.pre_handle(resp_job):
-            return await cls.analyze(request_job=resp_job.request_job, content=resp_job.content)
+    async def fail(self, request_job):
+        # do something with request fail
+        pass
+
+    async def _per_handle(self, resp_job: ResponseJob):
+        success, content = self.pre_handle(resp_job)
+        if success:
+            return await self.analyze(resp_job.request_job, content=self.parser(resp_job.content))
         else:
-            raise ValueError()
+            await self.fail(resp_job)
 
     @classmethod
     def request_builder(cls, keys: dict, params=None, headers=None, data=None, identity=None,
@@ -64,15 +79,38 @@ class Worker:
                           redirect_times=redirect_times)
 
     @classmethod
-    async def start(cls):
-        print(f'{cls.name}:{cls.worker}:Start')
+    def req_queue_name(cls):
+        return f'{cls.name}:{cls.worker}:request'
+
+    @property
+    def req_queue(self):
+        return JobQueue(self.app, name=self.req_queue_name())
+
+    @classmethod
+    def resp_queue_name(cls):
+        return f'{cls.name}:{cls.worker}:response'
+
+    @property
+    def resp_queue(self):
+        return JobQueue(self.app, name=self.resp_queue_name())
+
+    @classmethod
+    def filter_name(cls):
+        return f'{cls.name}:{cls.worker}:filter'
+
+    @property
+    def filter(self):
+        return BloomFilter(self.app, name=self.filter_name())
+
+    async def start(self):
+        print(f'{self.name}:{self.worker}:Start')
         while True:
             try:
-                queue = await JobQueue.get_queue(f'{cls.name}:{cls.worker}:response')
+                queue = self.resp_queue
                 content = await queue.get()
                 if content:
                     resp_job = ResponseJob.from_json(content.decode())
-                    await cls._per_handle(resp_job)
+                    await self._per_handle(resp_job)
                 else:
                     await asyncio.sleep(1)
 
