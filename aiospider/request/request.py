@@ -11,7 +11,6 @@ import aiohttp
 
 from aiospider.models.job import ResponseJob, RequestJob
 from aiospider.tools.job_queue import JobQueue
-from aiospider.tools.redis_pool import RedisPool
 
 
 class Bot:
@@ -56,7 +55,6 @@ class Bot:
         try:
             self.status = True
             queue = await JobQueue.get_queue(name)
-
             async with self.session as session:
                 while True:
                     item = await queue.get()
@@ -64,27 +62,31 @@ class Bot:
                         item = item.decode()
                         try:
                             req_job = RequestJob.from_json(item)
-                            pool = await RedisPool.get_pool().pool
-                            if req_job.params:
-                                key = f'{req_job.url}{sorted(req_job.params.items())}'
-                            else:
-                                key = f'{req_job.url}'
-                            if await pool.execute('sismember', f'{req_job.name}:{req_job.worker}:filter', key):
-                                continue
+                            # pool = await RedisPool.get_pool().pool
+                            # if req_job.params:
+                            #     key = f'{req_job.url}{sorted(req_job.params.items())}'
+                            # else:
+                            #     key = f'{req_job.url}'
+                            # if await pool.execute('sismember', f'{req_job.name}:{req_job.worker}:filter', key):
+                            #     continue
                         except Exception as e:
                             logging.exception(e)
                             continue
                         try:
                             status, content = await self.request(session, **req_job.get_request_params())
-                            # print(status, content)
+                            print(status, content)
                             await ResponseJob(request_job=req_job, url=req_job.url, worker=req_job.worker,
                                               name=req_job.name,
                                               success=True,
                                               status_code=status,
                                               content=content).send()
                         except Exception as e:
-                            req_job.send()
-                            logging.exception(e)
+                            await ResponseJob(request_job=req_job, url=req_job.url, worker=req_job.worker,
+                                              name=req_job.name,
+                                              success=True,
+                                              status_code=400,
+                                              content='{}').send()
+                            logging.error(str(e))
         except Exception as e:
             logging.exception(e)
             self.status = False

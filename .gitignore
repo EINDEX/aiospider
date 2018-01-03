@@ -154,3 +154,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.idea/aiospider.iml
+.idea/inspectionProfiles/
+.idea/markdown-navigator.xml
+.idea/markdown-navigator/
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+demo/

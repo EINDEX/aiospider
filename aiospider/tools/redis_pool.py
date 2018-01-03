@@ -9,6 +9,7 @@ import asyncio
 
 import aioredis
 
+from aiospider import config
 from aiospider.tools.singleton import Singleton
 
 
@@ -25,7 +26,7 @@ class RedisPool(metaclass=Singleton):
 
     @classmethod
     def get_pool(cls):
-        return RedisPool(redis_url='redis://localhost:6379/2')
+        return RedisPool(redis_url=config.Config.redis_conn)
 
 
 if __name__ == '__main__':
@@ -42,6 +43,8 @@ if __name__ == '__main__':
         print(await x3.pool)
         print(await x4.pool)
         print(await x5.pool)
+        x5.pool.close()
+        await asyncio.sleep(1)
 
 
     loop = asyncio.get_event_loop()
