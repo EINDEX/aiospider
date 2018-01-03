@@ -94,7 +94,7 @@ class RequestJob:
 
     @property
     def queue(self):
-        return JobQueue(self.app, f'{self.name}:{self.worker}:response')
+        return JobQueue(self.app, f'{self.name}:{self.worker}:request')
 
     @staticmethod
     def from_json(content):
@@ -137,6 +137,8 @@ class ResponseJob:
     def to_dict(self):
         content = {}
         for k, v in self.__dict__.items():
+            if k == '_app':
+                continue
             if v:
                 if isinstance(v, RequestJob):
                     v = v.to_dict()

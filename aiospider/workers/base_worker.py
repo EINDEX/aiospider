@@ -39,7 +39,7 @@ class Worker:
 
     @staticmethod
     def parser(data: dict):
-        pass
+        return data
 
     @staticmethod
     def pre_handle(resp_job: ResponseJob):
@@ -52,7 +52,7 @@ class Worker:
     async def _per_handle(self, resp_job: ResponseJob):
         success, content = self.pre_handle(resp_job)
         if success:
-            return await self.analyze(resp_job.request_job, content=self.parser(resp_job.content))
+            return await self.analyze(resp_job.request_job, content=self.parser(content))
         else:
             await self.fail(resp_job)
 
