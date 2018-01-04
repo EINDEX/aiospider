@@ -61,14 +61,14 @@ class Worker:
             await self.fail(resp_job)
 
     @classmethod
-    def request_builder(cls, keys: dict, params=None, headers=None, data=None, identity=None,
+    def request_builder(cls, keys: dict, params={}, headers=None, data=None, identity=None,
                         redirect_times=None,
                         allow_redirect=None,
                         proxy=None,
                         cookies=None):
         url = cls.url_regex
         for key, value in keys.items():
-            url = cls.url_regex.replace('{%s}' % key, str(value))
+            url = url.replace('{%s}' % key, str(value))
         for must in cls.require_params:
             if must not in params:
                 raise ValueError()

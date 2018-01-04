@@ -69,12 +69,9 @@ class RequestJob:
                 content[k] = v
         if self.method == 'GET' and not self.data:
             if not await self.bloom_filter(url=self.url, params=self.params):
-                await self.queue.push(json.dumps(content), reverse=True)
-                return True
-            else:
-                return False
+                return await self.queue.push(json.dumps(content), reverse=True)
         else:
-            return True
+            return await self.queue.push(json.dumps(content), reverse=True)
 
     def get_request_params(self):
         return {
