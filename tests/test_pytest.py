@@ -6,26 +6,27 @@
 @Created       : 26/12/2017
 """
 import asyncio
+import logging
 import time
 
 from aiospider import AIOSpider
+from aiospider.models.job import ResponseJob
+from aiospider.request.request import Bot
 from aiospider.tools.bloom_tools import BloomFilter
 from aiospider.tools.job_queue import JobQueue
 from aiospider.tools.redis_pool import RedisPool
 from aiospider.workers import Worker
 
 loop = asyncio.get_event_loop()
+app = AIOSpider(loop)
+app.config['redis_conn'] = 'redis://localhost:6379/2'
 
 
 def test_config():
-    app = AIOSpider(loop)
-    app.config['redis_conn'] = 'redis://localhost:6379/2'
     assert app.config['redis_conn'] == 'redis://localhost:6379/2'
 
 
 def test_redis():
-    app = AIOSpider(loop)
-    app.config['redis_conn'] = 'redis://localhost:6379/2'
     pool = RedisPool(app=app)
     pool3 = RedisPool(app=app)
 
@@ -41,8 +42,6 @@ def test_redis():
 
 
 def test_queue():
-    app = AIOSpider(loop)
-    app.config['redis_conn'] = 'redis://localhost:6379/2'
     # rp = RedisPool(app=app)
     jq = JobQueue(app, 'test')
 
@@ -56,8 +55,6 @@ def test_queue():
 
 
 def test_bloom():
-    app = AIOSpider(loop)
-    app.config['redis_conn'] = 'redis://localhost:6379/2'
     # rp = RedisPool(app=app)
     bf = BloomFilter(app, 'test_bloom')
     s = str(int(time.time()))
@@ -84,8 +81,6 @@ def test_aiospider():
 
 
 def test_job():
-    app = AIOSpider(loop)
-    app.config['redis_conn'] = 'redis://localhost:6379/2'
     # rp = RedisPool(app=app)
     bf = BloomFilter(app, 'test_bloom')
     s = str(int(time.time()))
@@ -98,7 +93,44 @@ def test_job():
     loop.run_until_complete(test_pool())
 
 
+class TestWorker(Worker):
+    name = 'test'
+    worker = 'test'
+    url_regex = 'http://baidu.com'
+    keys = {}
+    params = {}
+
+    async def start(self):
+        print(f'{self.name}:{self.worker}:Start')
+        # while True:
+        try:
+            queue = self.resp_queue
+            content = await queue.get()
+            if content:
+                resp_job = ResponseJob.from_json(content.decode())
+                await self._per_handle(resp_job)
+            else:
+                await asyncio.sleep(1)
+
+        except Exception as e:
+            logging.exception(e)
+
+
+def test_crawler():
+    # rp = RedisPool(app=app)
+
+    async def test_pool():
+        await TestWorker.request_builder(keys={}).send()
+        bot = Bot()
+        asyncio.gather(bot.start('test:test:request'))
+        await asyncio.sleep(10)
+        bot.status = False
+        await TestWorker().start()
+
+    loop.run_until_complete(test_pool())
+
+
 if __name__ == '__main__':
     # test_config()
     # test_redis()
-    test_worker()
+    test_crawler()

@@ -112,7 +112,7 @@ class ResponseJob:
                  url,
                  worker,
                  name,
-                 success,
+                 success=True,
                  identity=None,
                  content=None,
                  content_type=None,

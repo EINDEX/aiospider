@@ -67,6 +67,8 @@ class Bot:
             queue = JobQueue(None, name)
             async with self.session as session:
                 while True:
+                    if not self.status:
+                        return
                     item = await queue.get()
                     if item:
                         item = item.decode()

@@ -24,7 +24,11 @@ class Worker:
     require_params = []
     headers = {}
 
-    def __init__(self, app):
+    def __init__(self, app=None):
+        """
+
+        :param app:
+        """
         self._app = app
 
     @property
