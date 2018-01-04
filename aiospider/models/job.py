@@ -25,6 +25,7 @@ class RequestJob:
                  cookies=None,
                  proxy=None,
                  name=None,
+                 timeout=10,
                  allow_redirect=None,
                  redirect_times=None):
         self.url = url
@@ -39,6 +40,7 @@ class RequestJob:
         self.redirect_times = redirect_times
         self.identity = identity
         self.worker = worker
+        self.timeout = timeout
         self.name = name
         self._app = None
 
@@ -67,7 +69,7 @@ class RequestJob:
                 content[k] = v
         if self.method == 'GET' and not self.data:
             if not await self.bloom_filter(url=self.url, params=self.params):
-                await self.queue.push(json.dumps(content))
+                await self.queue.push(json.dumps(content), reverse=True)
                 return True
             else:
                 return False

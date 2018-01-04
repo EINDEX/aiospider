@@ -10,7 +10,7 @@ from aiospider.tools.singleton import OnlySingleton
 
 
 class AIOSpider(metaclass=OnlySingleton):
-    def __init__(self, loop):
+    def __init__(self, loop=None):
         self.config = dict()
         self.loop = loop
 
