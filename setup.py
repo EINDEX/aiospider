@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
         name='aiospider',
-        version='0.0.9',
+        version='0.0.10',
         description='A spider use asyncio.',
         license='MIT License',
         install_requires=['cchardet', 'aiodns', 'aiohttp', 'async-timeout', 'aioredis'],

@@ -20,6 +20,7 @@ class Worker:
     worker = 'base'
     url_regex = None
     method = None
+    filter_trigger = False
     params = {}
     require_params = []
     headers = {}
@@ -49,9 +50,9 @@ class Worker:
     def pre_handle(resp_job: ResponseJob):
         return resp_job.success, resp_job.content
 
-    async def fail(self, request_job):
+    async def fail(self, resp_job):
         # do something with request fail
-        pass
+        await resp_job.request_job.send()
 
     async def _per_handle(self, resp_job: ResponseJob):
         success, content = self.pre_handle(resp_job)
@@ -61,17 +62,24 @@ class Worker:
             await self.fail(resp_job)
 
     @classmethod
-    def request_builder(cls, keys: dict, params={}, headers=None, data=None, identity=None,
-                        redirect_times=None,
-                        allow_redirect=None,
-                        proxy=None,
-                        cookies=None):
+    async def request_builder(cls, keys: dict, params=None, headers=None, data=None, identity=None,
+                              redirect_times=None,
+                              allow_redirect=None,
+                              proxy=None,
+                              cookies=None):
         url = cls.url_regex
         for key, value in keys.items():
             url = url.replace('{%s}' % key, str(value))
+
+        if not params:
+            params = {}
         for must in cls.require_params:
             if must not in params:
                 raise ValueError()
+
+        if cls.filter_trigger:
+            if await cls.filter(url, keys, params):
+                return
         if isinstance(params, dict):
             cls.params.update(params)
         if headers:
@@ -102,9 +110,13 @@ class Worker:
     def filter_name(cls):
         return f'{cls.name}:{cls.worker}:filter'
 
-    @property
-    def filter(self):
-        return BloomFilter(self.app, name=self.filter_name())
+    @classmethod
+    async def filter(cls, url, keys, params, *args, **kwargs):
+        if params:
+            key = f'{url}{sorted(params.items())}'
+        else:
+            key = f'{url}'
+        return BloomFilter(cls.app, name=cls.filter_name()).exists(key)
 
     async def start(self):
         print(f'{self.name}:{self.worker}:Start')
