@@ -120,7 +120,7 @@ def test_crawler():
     # rp = RedisPool(app=app)
 
     async def test_pool():
-        await TestWorker.request_builder(keys={}).send()
+        await (await TestWorker.request_builder(keys={})).send()
         bot = Bot()
         asyncio.gather(bot.start('test:test:request'))
         await asyncio.sleep(10)
