@@ -9,7 +9,7 @@ coverage==4.4.2
 hiredis==0.2.0
 idna==2.6
 multidict==3.3.2
-pluggy==0.6.0
+pluggy==0.13.1
 py==1.5.2
 pycares==2.3.0
 pytest==3.3.1
