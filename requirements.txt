@@ -8,7 +8,7 @@ chardet==3.0.4
 coverage==4.4.2
 hiredis==0.2.0
 idna==2.6
-multidict==3.3.2
+multidict==4.7.6
 pluggy==0.6.0
 py==1.5.2
 pycares==2.3.0
