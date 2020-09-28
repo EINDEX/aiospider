@@ -12,7 +12,7 @@ multidict==3.3.2
 pluggy==0.6.0
 py==1.5.2
 pycares==2.3.0
-pytest==3.3.1
+pytest==6.1.0
 singleton==0.1.0
 six==1.11.0
 yarl==0.17.0
